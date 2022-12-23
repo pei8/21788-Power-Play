@@ -146,15 +146,36 @@ public class JakeAuto extends LinearOpMode {
         // The program is started
         if (isStarted()){
             grab.setPower(-0.5);
-
-            sleep(2000);
-            driveMotors(250,250,250,250,0.25);
             sleep(1000);
-            driveMotors(-1,-1,-1,-1,0.25);
+            driveMotors(400,400,400,400,0.25);
+            sleep(1000);
+            driveMotors(-60,-60,-60,-60,0.25);
+            sleep(1000);
 
+
+            driveMotors(100,100,-100,-100,0.25);
+            sleep(1000);
+            driveArm(90,0.2);
+            sleep(1000);
+            driveMotors(40,40,40,40,0.25);
+            sleep(1000);
+            tilt.setPower(0.5);
+            sleep(2000);
+            grab.setPower(0.5);
+            sleep(2000);
+            driveArm(0,0.3);
+            sleep(2000);
+
+            driveMotors(-320,-320,320,320,0.25);
+            sleep(1000);
+            driveMotors(150,150,150,150,0.25);
+            sleep(1000);
+
+
+            requestOpModeStop();
             if(tagOfInterest.id == LEFT){
                 sleep(1000);
-                driveMotors(-200,-200,200,200,0.5);
+                driveMotors(-200,-200,200,200,0.25);
                 sleep(1000);
                 driveMotors(70,70,70,70,0.25);
             }
@@ -179,10 +200,10 @@ public class JakeAuto extends LinearOpMode {
 
     }
     private void driveMotors(int flTarget, int blTarget, int frTarget, int brTarget, double speed){
-        flPos += flTarget;
-        blPos += blTarget;
-        frPos += frTarget;
-        brPos += brTarget;
+        flPos = flTarget;
+        blPos = blTarget;
+        frPos = frTarget;
+        brPos = brTarget;
 
 
         for (DcMotor motor: motors){
@@ -194,8 +215,11 @@ public class JakeAuto extends LinearOpMode {
         motorfr.setTargetPosition(frPos);
         motorbr.setTargetPosition(brPos);
 
+
         for (DcMotor motor: motors){
             motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        }
+        for (DcMotor motor: motors){
             motor.setPower(speed);
         }
 
@@ -207,19 +231,13 @@ public class JakeAuto extends LinearOpMode {
         }
     }
     private void driveArm(int armTarget, double speed){
-        armPos += armTarget;
+        armPos = armTarget;
 
         for (DcMotor arm: arms){
-            arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            //arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             arm.setTargetPosition(armPos);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             arm.setPower(speed);
-        }
-        while(opModeIsActive() && armR.isBusy() && armL.isBusy()){
-            idle();
-        }
-        for (DcMotor arm: arms){
-            arm.setPower(0);
         }
     }
     public void resetAngle(){
@@ -249,7 +267,7 @@ public class JakeAuto extends LinearOpMode {
 
         while (opModeIsActive() && Math.abs(error)>2){
             double motorPower = (error < 0 ? -0.3 : 0.3);
-            driveWithoutEncoders(-motorPower,motorPower,-motorPower,motorPower);
+            driveWithoutEncoders(-motorPower,-motorPower,motorPower,motorPower);
             error = degrees - getAngle();
             telemetry.addData("error",error);
             telemetry.update();
