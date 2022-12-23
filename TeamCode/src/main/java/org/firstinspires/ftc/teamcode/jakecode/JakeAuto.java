@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.jakecode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -8,6 +9,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -18,8 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Autonomous(name="JakeAuto", group="auto")
-public class JakeAuto extends LinearOpMode
-{
+public class JakeAuto extends LinearOpMode {
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -45,6 +49,10 @@ public class JakeAuto extends LinearOpMode
 
     AprilTagDetection tagOfInterest = null;
 
+    BNO055IMU imu;
+    private Orientation lastAngles = new Orientation();
+    private double currAngle = 0.0;
+
     private DcMotor motorfl;
     private DcMotor motorbl;
     private DcMotor motorfr;
@@ -68,9 +76,16 @@ public class JakeAuto extends LinearOpMode
 
     private List<DcMotor> motors;
     private List<DcMotor> arms;
+
+
     @Override
-    public void runOpMode()
-    {
+    public void runOpMode() {
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+
 
         motorfl = hardwareMap.get(DcMotor.class, "motorfl");
         motorbl = hardwareMap.get(DcMotor.class, "motorbl");
@@ -93,6 +108,7 @@ public class JakeAuto extends LinearOpMode
 
         for (DcMotor motor:motors){
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
         for (DcMotor arm: arms){
             arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -152,7 +168,16 @@ public class JakeAuto extends LinearOpMode
 
         }
     }
+    private void driveWithoutEncoders(double flPower, double blPower, double frPower, double brPower){
+        for (DcMotor motor:motors){
+            motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
+        motorfl.setPower(flPower);
+        motorbl.setPower(blPower);
+        motorfr.setPower(frPower);
+        motorbr.setPower(brPower);
 
+    }
     private void driveMotors(int flTarget, int blTarget, int frTarget, int brTarget, double speed){
         flPos += flTarget;
         blPos += blTarget;
@@ -181,8 +206,6 @@ public class JakeAuto extends LinearOpMode
             motor.setPower(0);
         }
     }
-
-
     private void driveArm(int armTarget, double speed){
         armPos += armTarget;
 
@@ -198,6 +221,55 @@ public class JakeAuto extends LinearOpMode
         for (DcMotor arm: arms){
             arm.setPower(0);
         }
+    }
+    public void resetAngle(){
+        lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+        currAngle = 0;
+    }
+    public double getAngle(){
+        Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+
+        double deltaAngle = orientation.firstAngle - lastAngles.firstAngle;
+
+        if (deltaAngle > 180){
+            deltaAngle -= 360;
+        }
+        else if (deltaAngle <= -180){
+            deltaAngle += 360;
+        }
+
+        currAngle += deltaAngle;
+        lastAngles = orientation;
+        telemetry.addData("gyro",orientation.firstAngle);
+        return currAngle;
+    }
+    public void turn(double degrees){
+        resetAngle();
+        double error = degrees;
+
+        while (opModeIsActive() && Math.abs(error)>2){
+            double motorPower = (error < 0 ? -0.3 : 0.3);
+            driveWithoutEncoders(-motorPower,motorPower,-motorPower,motorPower);
+            error = degrees - getAngle();
+            telemetry.addData("error",error);
+            telemetry.update();
+        }
+        driveWithoutEncoders(0,0,0,0);
+        for (DcMotor motor:motors){
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
+    public void turnTo(double degrees){
+        Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+        double error = degrees - orientation.firstAngle;
+
+        if(error > 180){
+            error -= 360;
+        }
+        else if(error < -180){
+            error += 360;
+        }
+        turn(error);
     }
 
 }
