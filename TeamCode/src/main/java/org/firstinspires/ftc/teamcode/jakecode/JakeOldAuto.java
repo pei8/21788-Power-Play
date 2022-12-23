@@ -1,6 +1,7 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.jakecode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -10,8 +11,10 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
-@Autonomous(name="JakeAuto", group="auto")
-public class JakeAuto extends LinearOpMode {
+
+@Disabled
+@Autonomous(name="JakeOldAuto", group="auto")
+public class JakeOldAuto extends LinearOpMode {
     private DcMotor motorfl;
     private DcMotor motorbl;
     private DcMotor motorfr;
