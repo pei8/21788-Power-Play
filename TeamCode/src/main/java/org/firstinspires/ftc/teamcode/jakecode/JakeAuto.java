@@ -112,6 +112,7 @@ public class JakeAuto extends LinearOpMode {
         }
         for (DcMotor arm: arms){
             arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
 
         flPos = 0;
@@ -145,34 +146,54 @@ public class JakeAuto extends LinearOpMode {
 
         // The program is started
         if (isStarted()){
+            //test code
+
             grab.setPower(-0.5);
+
+            //push signal cone away
             sleep(1000);
             driveMotors(400,400,400,400,0.25);
             sleep(1000);
             driveMotors(-60,-60,-60,-60,0.25);
             sleep(1000);
 
-
+            //turn right
             driveMotors(100,100,-100,-100,0.25);
             sleep(1000);
-            driveArm(90,0.2);
-            sleep(1000);
-            driveMotors(40,40,40,40,0.25);
-            sleep(1000);
-            tilt.setPower(0.5);
-            sleep(2000);
-            grab.setPower(0.5);
-            sleep(2000);
-            driveArm(0,0.3);
-            sleep(2000);
 
-            driveMotors(-320,-320,320,320,0.25);
-            sleep(1000);
-            driveMotors(150,150,150,150,0.25);
-            sleep(1000);
+            //place cone
+            driveArm(0,1);
+            sleep(4000);
 
 
             requestOpModeStop();
+
+
+            placeCone(10,17);
+
+
+
+
+            driveMotors(-320,-320,320,320,0.25);
+            sleep(1000);
+
+            grab.setPower(0.5);
+            sleep(2000);
+
+            driveMotors(150,150,150,150,0.25);
+            sleep(1000);
+
+            grab.setPower(-0.5);
+            sleep(2000);
+
+            driveArm(0,1);
+            sleep(2000);
+
+            driveMotors(-100,-100,-100,-100,0.25);
+            sleep(2000);
+
+
+
             if(tagOfInterest.id == LEFT){
                 sleep(1000);
                 driveMotors(-200,-200,200,200,0.25);
@@ -189,6 +210,9 @@ public class JakeAuto extends LinearOpMode {
 
         }
     }
+
+
+
     private void driveWithoutEncoders(double flPower, double blPower, double frPower, double brPower){
         for (DcMotor motor:motors){
             motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -230,15 +254,18 @@ public class JakeAuto extends LinearOpMode {
             motor.setPower(0);
         }
     }
-    private void driveArm(int armTarget, double speed){
-        armPos = armTarget;
+    private void driveArm(int armTarget, double power){
 
+        armPos = armTarget;
+        telemetry.addLine(String.valueOf(armPos));
         for (DcMotor arm: arms){
             //arm.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             arm.setTargetPosition(armPos);
             arm.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            arm.setPower(speed);
+            arm.setPower(power);
         }
+
+        telemetry.update();
     }
     public void resetAngle(){
         lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
@@ -289,5 +316,24 @@ public class JakeAuto extends LinearOpMode {
         }
         turn(error);
     }
+    public void placeCone(int target, int end){
+        driveArm(target,0.2);
+        sleep(1000);
 
+        driveMotors(40,40,40,40,0.25);
+        sleep(1000);
+
+        tilt.setPower(0.5);
+        sleep(2000);
+        grab.setPower(0.5);
+        sleep(2000);
+        grab.setPower(-0.5);
+        sleep(2000);
+
+        driveArm(end,0.3);
+        sleep(2000);
+
+        grab.setPower(0);
+        sleep(2000);
+    }
 }
