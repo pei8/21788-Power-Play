@@ -105,6 +105,7 @@ public class RefAuto2A_Left extends LinearOpMode {
         grab = hardwareMap.get(CRServo.class, "grab");
         tilt = hardwareMap.get(CRServo.class, "tilt");
         ks109 = hardwareMap.get(KS109I2cDistance.class, "ks109");
+        colorSens = hardwareMap.get(ColorSensor.class, "colorSens");
 
         motors = Arrays.asList(motorfl, motorbl, motorbr, motorfr); //array containing all motors
         arms = Arrays.asList(armL, armR);//array of arm motors
@@ -207,13 +208,24 @@ public class RefAuto2A_Left extends LinearOpMode {
         placeCone(highArmTicks, -(highArmTicks-fifthArmTicks), 500, 0.6, 0.5);
 //
         // turn left 135 degrees. Now the robot is facing the wall and should be watching the stack of cones.
-        turnTicks = 272;
+        turnTicks = 270;
         driveMotors(-turnTicks, -turnTicks, turnTicks, turnTicks, 0.6);
         sleep(500);
 
 //        requestOpModeStop();
-        int moveTicks = (int) (18 * ticksPerInch);
+
+        // Move forward 12 inches first
+        int moveTicks = (int) (12 * ticksPerInch);
         driveMotors(moveTicks, moveTicks, moveTicks, moveTicks, 0.6);
+
+        turnTicks = 7;
+        while (opModeIsActive() && !lineIsRedOrBlue()) {
+            driveMotors(-turnTicks, -turnTicks, turnTicks, turnTicks, 0.6);
+            sleep(500);
+        }
+
+        // Locate red or blue line
+
         requestOpModeStop();
 
 
@@ -416,5 +428,28 @@ public class RefAuto2A_Left extends LinearOpMode {
         grab.setPower(0.5);
         sleep(intervalMs);
 
+    }
+
+    private boolean lineIsRedOrBlue() {
+        int R, G, B, maxVal;
+        R = colorSens.red();
+        G = colorSens.green();
+        B = colorSens.blue();
+        maxVal = Math.max(Math.max(R, G), B);
+        String color;
+        if (R == maxVal)
+            color = "Red";
+        else if (G == maxVal)
+            color = "Green";
+        else
+            color = "Blue";
+
+        telemetry.addLine(String.format("\nDetected RGB=%d, %d, %d. Color=%s", R, G, B, color));
+        telemetry.update();
+
+        if ((R == maxVal) || (B == maxVal))
+            return true;
+        else
+            return false;
     }
 }

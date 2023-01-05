@@ -198,7 +198,7 @@ public class RefAuto1A_Left extends LinearOpMode {
 //        requestOpModeStop();
 
         // turn right 45 degrees
-        int turnTicks = 114;
+        int turnTicks = 117;
         driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
 
