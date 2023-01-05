@@ -271,6 +271,7 @@ public class JakeAuto extends LinearOpMode {
         lastAngles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
         currAngle = 0;
     }
+
     public double getAngle(){
         Orientation orientation = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
 
