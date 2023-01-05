@@ -27,7 +27,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Reference;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -83,9 +83,7 @@ public class TeleopKS109 extends LinearOpMode {
 
       // send the info back to driver station using telemetry function.
       double dDistance = ks109.getDistance();
-      telemetry.addData("Distance (mm)", dDistance);
-      telemetry.addData("Distance (in)", dDistance / 25.4 );
-
+      telemetry.addData("Distance (in)", dDistance);
       telemetry.update();
     }
   }

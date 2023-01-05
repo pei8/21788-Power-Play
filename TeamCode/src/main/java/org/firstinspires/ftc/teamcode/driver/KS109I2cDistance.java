@@ -23,6 +23,7 @@ public class KS109I2cDistance extends I2cDeviceSynchDevice<I2cDeviceSynch> imple
 
     public final static int DRIVER_VERSION = 100;
     public final static I2cAddr ADDRESS_I2C_DEFAULT = I2cAddr.create8bit(0xe8);
+    public double mmToInch = 0.0393701;
 
     public enum Register
     {
@@ -173,7 +174,7 @@ public class KS109I2cDistance extends I2cDeviceSynchDevice<I2cDeviceSynch> imple
         writeCommand(Command.GET_DISTANCE_BC);
         this.deviceClient.waitForWriteCompletions(I2cWaitControl.ATOMIC);
         safeSleep(100);
-        return readShortBE(Register.COMMAND)&0xFFFF;
+        return ((double)(readShortBE(Register.COMMAND)&0xFFFF) * mmToInch);
     }
 
     public Hashtable<String, Object> getDeviceInfo()
