@@ -12,7 +12,6 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.common.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.driver.KS109I2cDistance;
@@ -25,9 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-// Target to score 2 elements
-@Autonomous(name="RefAuto2A_Left", group="auto")
-public class RefAuto2A_Left extends LinearOpMode {
+@Autonomous(name="RefAuto1B_Left", group="auto")
+public class RefAuto1B_Left extends LinearOpMode {
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -106,8 +104,6 @@ public class RefAuto2A_Left extends LinearOpMode {
         grab = hardwareMap.get(CRServo.class, "grab");
         tilt = hardwareMap.get(CRServo.class, "tilt");
         ks109 = hardwareMap.get(KS109I2cDistance.class, "ks109");
-        colorSens = hardwareMap.get(ColorSensor.class, "colorSens");
-        distanceSens = hardwareMap.get(DistanceSensor.class, "distanceSens");
 
         motors = Arrays.asList(motorfl, motorbl, motorbr, motorfr); //array containing all motors
         arms = Arrays.asList(armL, armR);//array of arm motors
@@ -175,6 +171,13 @@ public class RefAuto2A_Left extends LinearOpMode {
         camera = null;
         aprilTagDetectionPipeline = null;
 
+        // The program is started
+//        driveOneMotor(motorfl, 100, 1.0);
+//        driveOneMotor(motorbl, 100, 1.0);
+//        driveOneMotor(motorfr, 100, 1.0);
+//        driveOneMotor(motorbr, 100, 1.0);
+//        requestOpModeStop();
+
         // grab the preloaded cone
         grab.setPower(-0.5);
         sleep(500);
@@ -189,98 +192,47 @@ public class RefAuto2A_Left extends LinearOpMode {
         driveMotors(400,400,400,400,0.6);
         sleep(500);
 
-        // move backward XX 52 (+- 0.5) inches using KS109 sensor to measure the distance
-        driveMotorsToDistanceByKs109(51.5, 0.6);
+        // move backward to 52 (+- 0.5) inches
+        driveMotorsToDistance(51.5, 0.6);
 //        sleep(5000);
 //        requestOpModeStop();
 
         // turn right 45 degrees
-        int turnTicks = 117;
+        int turnTicks = 120;
         driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
 
 //        sleep(5000);
 //        requestOpModeStop();
 
-        // place cone and low arm from the highest position XX to 17
-        // 17 is the arm position to the 5th cone in the stack based on the testing.
+        // place cone and low arm to XX from final high position YY
         // The end position must be calculated based on previous position.
-        int highArmTicks = 60;      // from ground
-        int fifthArmTicks = 14;     // from ground
-        placeCone(highArmTicks, -(highArmTicks-fifthArmTicks), 500, 0.6, 0.5);
-//
-        // turn left 135 degrees. Now the robot is facing the wall and should be watching the stack of cones.
-        turnTicks = 275;
-        driveMotors(-turnTicks, -turnTicks, turnTicks, turnTicks, 0.6);
+        placeCone(60,-60, 1000, 0.6, 0.5);
+
+        // This is the major difference between 1A and 1B.
+        // Robot will turn right for about 45 degrees with its back facing the wall in order to:
+        //  1) Reduce the turn error due to the bigger rotation.
+        //  2) Utilize ks109 distance sensor for more precise parking to the destination zone.
+        //
+        // Turn right for another 45 degree. Now the robot will have its back facing the wall.
+        turnTicks = 118;
+        driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
 
-//        requestOpModeStop();
+        //
+        // Park to the identified zone accurately by using ks109 sensor...
+        //
+        double targetDistanceInch;
 
-        // Move forward 12 inches first
-        int moveTicks = (int) (14 * ticksPerInch);
-        driveMotors(moveTicks, moveTicks, moveTicks, moveTicks, 0.6);
+        if (tagID == LEFT)
+            targetDistanceInch = 5.0;
+        else if (tagID == MIDDLE)
+            targetDistanceInch = 28.0;
+        else // tagID == RIGHT
+            targetDistanceInch = 50.0;
+        driveMotorsToDistance(targetDistanceInch, 0.2);
 
-//        while (opModeIsActive() && !lineIsRedOrBlue()) {
-//            //driveMotors(-turnTicks, -turnTicks, turnTicks, turnTicks, 0.6);
-//            sleep(500);
-//        }
-//
-        // turn left to seek the red/blue line
-        // Locate red or blue line
-        driveWithoutEncoders(-0.2,-0.2,0.2,0.2);
-        while (opModeIsActive()){
-            if (lineIsRedOrBlue()){
-                driveWithoutEncoders(0,0,0,0);
-                break;
-            }
-            sleep(100);
-        }
-        sleep(500);
-
-        // Move forward till XX inch to the cone stack
-        driveWithoutEncoders(0.2,0.2,0.2,0.2);
-        while (opModeIsActive()){
-            if (distanceSens.getDistance(DistanceUnit.INCH) <= 4){
-                driveWithoutEncoders(0,0,0,0);
-                break;
-            }
-            sleep(100);
-        }
-        // grab the cone
-        grab.setPower(-0.5);
-        sleep(500);
-        double power = -0.2;
-        driveWithoutEncoders(power, power, power, power);
-        sleep(400);
-        power = 0;
-        driveWithoutEncoders(power, power, power, power);
-
-        //driveMotors(-40,-40,-40,-40,0.2);
-        driveArm(40,0.7);
-        sleep(500);
-        double distance = 28.0;
-        driveMotorsToDistanceByRevSensor(distance, 0.6);
-
-
-        requestOpModeStop();
-
-
-
-
-        if(tagID == LEFT) {
-            // Move forward XX inches
-            moveTicks = (int) (18 * ticksPerInch);
-        }
-        else if(tagID == RIGHT) {
-            // Move backward YY inches
-            moveTicks = -(int)(23 * ticksPerInch);
-        }
-        else { // Default, middle,
-            // Move backward ZZ inches
-            moveTicks = -(int)(2 * ticksPerInch);
-        }
-        driveMotors(moveTicks, moveTicks, moveTicks, moveTicks, 0.6);
-        // tilt the grabber inward a little bit
+         // tilt the grabber inward a little bit
         tilt.setPower(0.5);
         sleep(1000);
         requestOpModeStop();
@@ -295,9 +247,7 @@ public class RefAuto2A_Left extends LinearOpMode {
         motorbl.setPower(blPower);
         motorfr.setPower(frPower);
         motorbr.setPower(brPower);
-        for (DcMotor motor:motors){
-            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
+
     }
     private void driveMotors(int flTarget, int blTarget, int frTarget, int brTarget, double speed){
         flPos = flTarget;
@@ -331,10 +281,9 @@ public class RefAuto2A_Left extends LinearOpMode {
         }
     }
 
-    private void driveMotorsToDistanceByKs109(double targetDistanceInch, double power){
+    private void driveMotorsToDistance(double targetDistanceInch, double power){
         double currentDistance = ks109.getDistance();
-        int ticks = 0;
-        int tickDirection = 1;
+        int ticks, tickDirection;
 
         double diff = Math.abs(currentDistance - targetDistanceInch);
         telemetry.addLine(String.format("\nDistance=%.2f inch", currentDistance));
@@ -349,29 +298,6 @@ public class RefAuto2A_Left extends LinearOpMode {
                 currentDistance = ks109.getDistance();
             }
             telemetry.addLine(String.format("\nDistance=%.2f inch", currentDistance));
-            telemetry.update();
-            diff = Math.abs(currentDistance - targetDistanceInch);
-        }
-    }
-
-    private void driveMotorsToDistanceByRevSensor(double targetDistanceInch, double power){
-        double currentDistance = distanceSens.getDistance(DistanceUnit.INCH);
-        int ticks = 0;
-        int tickDirection = 1;
-
-        double diff = Math.abs(currentDistance - targetDistanceInch);
-        telemetry.addLine(String.format("\nRevDistance=%.2f inch", currentDistance));
-        telemetry.update();
-        while (diff > 1.0 && opModeIsActive()) {
-            ticks = (int) (diff * ticksPerInch);
-            tickDirection = (currentDistance < targetDistanceInch) ? 1 : -1;
-            if (ticks > 0) {
-                driveMotors(tickDirection * ticks, tickDirection * ticks,
-                        tickDirection * ticks, tickDirection * ticks,
-                        power);
-                currentDistance = distanceSens.getDistance(DistanceUnit.INCH);
-            }
-            telemetry.addLine(String.format("\nRevDistance=%.2f inch", currentDistance));
             telemetry.update();
             diff = Math.abs(currentDistance - targetDistanceInch);
         }
@@ -484,37 +410,5 @@ public class RefAuto2A_Left extends LinearOpMode {
         // Lower arm to the target position
         driveArm(end, armPower);
         sleep(intervalMs);
-
-        // open the grabber
-        grab.setPower(0.5);
-        sleep(intervalMs);
-
-    }
-
-    private boolean lineIsRedOrBlue() {
-        int R, G, B, maxVal;
-        R = colorSens.red();
-        G = colorSens.green();
-        B = colorSens.blue();
-        maxVal = Math.max(Math.max(R, G), B);
-        String color = "None";
-        if (maxVal >= 200) {
-            if (R == maxVal)
-                color = "Red";
-            else if (G == maxVal)
-                color = "Green";
-            else
-                color = "Blue";
-        }
-
-        telemetry.addLine(String.format("\nDetected RGB=%d, %d, %d. Color=%s", R, G, B, color));
-        telemetry.update();
-
-        if ((maxVal >= 200) && ((R == maxVal) || (B == maxVal))) {
-            return true;
-        }
-        else {
-            return false;
-        }
     }
 }
