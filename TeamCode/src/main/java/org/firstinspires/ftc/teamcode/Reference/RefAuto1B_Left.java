@@ -12,6 +12,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.common.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.driver.KS109I2cDistance;
@@ -104,6 +105,7 @@ public class RefAuto1B_Left extends LinearOpMode {
         grab = hardwareMap.get(CRServo.class, "grab");
         tilt = hardwareMap.get(CRServo.class, "tilt");
         ks109 = hardwareMap.get(KS109I2cDistance.class, "ks109");
+        distanceSens = hardwareMap.get(DistanceSensor.class, "distanceSens");
 
         motors = Arrays.asList(motorfl, motorbl, motorbr, motorfr); //array containing all motors
         arms = Arrays.asList(armL, armR);//array of arm motors
@@ -189,25 +191,30 @@ public class RefAuto1B_Left extends LinearOpMode {
         // Field test data:
         //  1) 400 ticks == 61 inch  ====> 1 inch == 6.56 ticks
         //  2) Power 0.6 is the most stable power level
-        driveMotors(400,400,400,400,0.6);
+        double power = 0.3;
+        double factor = 1;
+        driveMotors(420,420,420,420,power);
         sleep(500);
 
         // move backward to 52 (+- 0.5) inches
-        driveMotorsToDistance(51.5, 0.6);
-//        sleep(5000);
+        driveMotorsToDistance(50, power);
+        //driveMotors(420,420,420,420,power);
+
 //        requestOpModeStop();
+//        sleep(5000);
 
         // turn right 45 degrees
-        int turnTicks = 120;
+        int turnTicks = 70;
         driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
-
 //        sleep(5000);
-//        requestOpModeStop();
+
+
+//      requestOpModeStop();
 
         // place cone and low arm to XX from final high position YY
         // The end position must be calculated based on previous position.
-        placeCone(60,-60, 1000, 0.6, 0.5);
+        placeCone(65,-60, 1000, 0.6, 0.5);
 
         // This is the major difference between 1A and 1B.
         // Robot will turn right for about 45 degrees with its back facing the wall in order to:
@@ -215,25 +222,29 @@ public class RefAuto1B_Left extends LinearOpMode {
         //  2) Utilize ks109 distance sensor for more precise parking to the destination zone.
         //
         // Turn right for another 45 degree. Now the robot will have its back facing the wall.
-        turnTicks = 118;
+        turnTicks = 120;
         driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
 
         //
-        // Park to the identified zone accurately by using ks109 sensor...
+        // Par k to the identified zone accurately by using ks109 sensor...
         //
         double targetDistanceInch;
 
-        if (tagID == LEFT)
-            targetDistanceInch = 5.0;
-        else if (tagID == MIDDLE)
-            targetDistanceInch = 28.0;
-        else // tagID == RIGHT
-            targetDistanceInch = 50.0;
-        driveMotorsToDistance(targetDistanceInch, 0.2);
-
+        if (tagID == LEFT){
+            driveMotors(-140,-140,-140,-140,0.2);
+            //targetDistanceInch = 5.0;
+        }
+        else if (tagID == MIDDLE){
+            //targetDistanceInch = 28.0;
+        }
+        else{// tagID == RIGHT
+            driveMotors(140,140,140,140,0.2);
+            //targetDistanceInch = 50.0;
+        }
+        //targetDistanceInch = 50.0;
+        //driveMotorsToDistance(targetDistanceInch, 0.2);
          // tilt the grabber inward a little bit
-        tilt.setPower(0.5);
         sleep(1000);
         requestOpModeStop();
     }
@@ -284,7 +295,7 @@ public class RefAuto1B_Left extends LinearOpMode {
     private void driveMotorsToDistance(double targetDistanceInch, double power){
         double currentDistance = ks109.getDistance();
         int ticks, tickDirection;
-
+        double factor = 1;
         double diff = Math.abs(currentDistance - targetDistanceInch);
         telemetry.addLine(String.format("\nDistance=%.2f inch", currentDistance));
         telemetry.update();
@@ -292,7 +303,7 @@ public class RefAuto1B_Left extends LinearOpMode {
             ticks = (int) (diff * ticksPerInch);
             tickDirection = (currentDistance < targetDistanceInch) ? 1 : -1;
             if (ticks > 0) {
-                driveMotors(tickDirection * ticks, tickDirection * ticks,
+                driveMotors((int)(tickDirection * ticks *factor), (int)(tickDirection * ticks*factor),
                         tickDirection * ticks, tickDirection * ticks,
                         power);
                 currentDistance = ks109.getDistance();
@@ -382,31 +393,36 @@ public class RefAuto1B_Left extends LinearOpMode {
     }
     public void placeCone(int target, int end, int intervalMs, double wheelPower, double armPower){
         // Raise arm
+
         driveArm(target, armPower);
         sleep(intervalMs);
 
+        driveWithoutEncoders(0.3,0.3,-0.3,-0.3);
+        while (true){
+            if (distanceSens.getDistance(DistanceUnit.INCH)<20){
+                driveWithoutEncoders(0,0,0,0);
+                break;
+            }
+        }
+        // tilt the grabber
+
         // move forward for x inches
-        int forwardPos = 26;
+        int forwardPos = 50;
         driveMotors(forwardPos, forwardPos, forwardPos, forwardPos, wheelPower);
         sleep(intervalMs);
-
-        // tilt the grabber
-        tilt.setPower(0.5);
-        sleep(intervalMs);
-        tilt.setPower(0);
 
         // loose the grabber
         grab.setPower(0.5);
         sleep(intervalMs);
 
         // driver back
-        driveMotors(-forwardPos, -forwardPos, -forwardPos, -forwardPos, wheelPower);
-
+        driveMotors(-forwardPos+20, -forwardPos+20, -forwardPos+20, -forwardPos+20, wheelPower);
+        sleep(intervalMs);
         // close the grabber
         grab.setPower(-0.5);
         sleep(intervalMs);
         grab.setPower(0);
-
+        sleep(intervalMs);
         // Lower arm to the target position
         driveArm(end, armPower);
         sleep(intervalMs);

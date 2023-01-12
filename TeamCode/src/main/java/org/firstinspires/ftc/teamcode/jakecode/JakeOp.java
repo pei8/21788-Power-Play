@@ -43,6 +43,8 @@ public class JakeOp extends LinearOpMode {
 
         armR.setDirection(DcMotor.Direction.REVERSE);
 
+
+
         // Put initialization blocks here.
         waitForStart();
         while (opModeIsActive()) {
@@ -58,14 +60,14 @@ public class JakeOp extends LinearOpMode {
             double rightArm = gamepad2.left_stick_y;
             double leftArm = gamepad2.left_stick_y;
 
-            armR.setPower(rightArm * 0.7);
-            armL.setPower(leftArm * 0.7);
+            armR.setPower(rightArm * 0.8);
+            armL.setPower(leftArm * 0.8);
 
             double tiltServo = gamepad2.right_stick_y * 0.5;
             double grabServo = gamepad2.right_trigger - gamepad2.left_trigger;
             grab.setPower(grabServo);
             tilt.setPower(tiltServo);
-
+            telemetry.addLine(String.valueOf(tiltServo));
 
             telemetry.update();
         }
