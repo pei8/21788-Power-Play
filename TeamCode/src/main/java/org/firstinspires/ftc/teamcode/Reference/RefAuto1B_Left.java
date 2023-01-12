@@ -173,13 +173,6 @@ public class RefAuto1B_Left extends LinearOpMode {
         camera = null;
         aprilTagDetectionPipeline = null;
 
-        // The program is started
-//        driveOneMotor(motorfl, 100, 1.0);
-//        driveOneMotor(motorbl, 100, 1.0);
-//        driveOneMotor(motorfr, 100, 1.0);
-//        driveOneMotor(motorbr, 100, 1.0);
-//        requestOpModeStop();
-
         // grab the preloaded cone
         grab.setPower(-0.5);
         sleep(500);
@@ -200,17 +193,11 @@ public class RefAuto1B_Left extends LinearOpMode {
         driveMotorsToDistance(50, power);
         //driveMotors(420,420,420,420,power);
 
-//        requestOpModeStop();
-//        sleep(5000);
-
         // turn right 45 degrees
         int turnTicks = 70;
         driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
 //        sleep(5000);
-
-
-//      requestOpModeStop();
 
         // place cone and low arm to XX from final high position YY
         // The end position must be calculated based on previous position.
@@ -397,32 +384,35 @@ public class RefAuto1B_Left extends LinearOpMode {
         driveArm(target, armPower);
         sleep(intervalMs);
 
+        // Turn right until the Rev2M distance sensor detected a distance less than 20 inches
+        // Otherwise, the distance sensor will give a very big number like 322 inches.
         driveWithoutEncoders(0.3,0.3,-0.3,-0.3);
-        while (true){
+        while (opModeIsActive()){
             if (distanceSens.getDistance(DistanceUnit.INCH)<20){
                 driveWithoutEncoders(0,0,0,0);
                 break;
             }
         }
-        // tilt the grabber
 
-        // move forward for x inches
+        // move forward for x ticks
         int forwardPos = 50;
         driveMotors(forwardPos, forwardPos, forwardPos, forwardPos, wheelPower);
         sleep(intervalMs);
 
-        // loose the grabber
+       // loose the grabber
         grab.setPower(0.5);
         sleep(intervalMs);
 
         // driver back
         driveMotors(-forwardPos+20, -forwardPos+20, -forwardPos+20, -forwardPos+20, wheelPower);
         sleep(intervalMs);
+
         // close the grabber
         grab.setPower(-0.5);
         sleep(intervalMs);
         grab.setPower(0);
         sleep(intervalMs);
+
         // Lower arm to the target position
         driveArm(end, armPower);
         sleep(intervalMs);

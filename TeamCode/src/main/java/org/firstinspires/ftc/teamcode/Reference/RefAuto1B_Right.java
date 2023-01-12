@@ -123,7 +123,6 @@ public class RefAuto1B_Right extends LinearOpMode {
             arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
-        tilt.setPower(0);
 
         flPos = 0;
         blPos = 0;
@@ -174,13 +173,6 @@ public class RefAuto1B_Right extends LinearOpMode {
         camera = null;
         aprilTagDetectionPipeline = null;
 
-        // The program is started
-//        driveOneMotor(motorfl, 100, 1.0);
-//        driveOneMotor(motorbl, 100, 1.0);
-//        driveOneMotor(motorfr, 100, 1.0);
-//        driveOneMotor(motorbr, 100, 1.0);
-//        requestOpModeStop();
-
         // grab the preloaded cone
         grab.setPower(-0.5);
         sleep(500);
@@ -201,18 +193,11 @@ public class RefAuto1B_Right extends LinearOpMode {
         driveMotorsToDistance(50, power);
         //driveMotors(420,420,420,420,power);
 
-
-//        requestOpModeStop();
-//        sleep(5000);
-
-        // turn right 45 degrees
-        int turnTicks = -80;
+        // turn right close to 45 degrees
+        int turnTicks = -70;
         driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
 //        sleep(5000);
-
-
-//      requestOpModeStop();
 
         // place cone and low arm to XX from final high position YY
         // The end position must be calculated based on previous position.
@@ -224,7 +209,7 @@ public class RefAuto1B_Right extends LinearOpMode {
         //  2) Utilize ks109 distance sensor for more precise parking to the destination zone.
         //
         // Turn right for another 45 degree. Now the robot will have its back facing the wall.
-        turnTicks = -110;
+        turnTicks = -105;
         driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
 
@@ -234,14 +219,15 @@ public class RefAuto1B_Right extends LinearOpMode {
         double targetDistanceInch;
 
         if (tagID == LEFT){
-            driveMotors(140,140,140,140,0.2);
+            driveMotors(150,150,150,150,0.2);
             //targetDistanceInch = 5.0;
         }
         else if (tagID == MIDDLE){
             //targetDistanceInch = 28.0;
+            driveMotors(20,20,20,20,0.2);
         }
         else{// tagID == RIGHT
-            driveMotors(-140,-140,-140,-140,0.2);
+            driveMotors(-150,-150,-150,-150,0.2);
             //targetDistanceInch = 50.0;
         }
         //targetDistanceInch = 50.0;
@@ -399,20 +385,18 @@ public class RefAuto1B_Right extends LinearOpMode {
         driveArm(target, armPower);
         sleep(intervalMs);
 
-        driveWithoutEncoders(-0.4,-0.4,0.4,0.4);
-        while (true){
+        // Turn left until the Rev2M distance sensor detected a distance less than 20 inches
+        // Otherwise, the distance sensor will give a very big number like 322 inches.
+       driveWithoutEncoders(-0.4,-0.4,0.4,0.4);
+        while (opModeIsActive()){
             if (distanceSens.getDistance(DistanceUnit.INCH)<20){
                 driveWithoutEncoders(0,0,0,0);
                 break;
             }
         }
-        // tilt the grabber
-        tilt.setPower(0.5);
-        sleep(intervalMs);
 
         // move forward for x inches
-
-        int forwardPos = 60;
+        int forwardPos = 50;
         driveMotors(forwardPos, forwardPos, forwardPos, forwardPos, wheelPower);
         sleep(intervalMs);
 
@@ -421,13 +405,15 @@ public class RefAuto1B_Right extends LinearOpMode {
         sleep(intervalMs);
 
         // driver back
-        driveMotors(-forwardPos+20, -forwardPos+20, -forwardPos+20, -forwardPos+20, wheelPower);
+        driveMotors(-forwardPos+10, -forwardPos+10, -forwardPos+10, -forwardPos+10, wheelPower);
         sleep(intervalMs);
+
         // close the grabber
         grab.setPower(-0.5);
         sleep(intervalMs);
         grab.setPower(0);
         sleep(intervalMs);
+
         // Lower arm to the target position
         driveArm(end, armPower);
         sleep(intervalMs);
