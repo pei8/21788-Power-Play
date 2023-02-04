@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
-<<<<<<< HEAD
-    android:versionCode="48"
-          android:versionName="8.1">
-=======
+
     android:versionCode="49"
-          android:versionName="8.1.1">
->>>>>>> 0879b4797f7c9664731c9306926f713ef4ddfe5d
+    android:versionName="8.1.1">
 
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 

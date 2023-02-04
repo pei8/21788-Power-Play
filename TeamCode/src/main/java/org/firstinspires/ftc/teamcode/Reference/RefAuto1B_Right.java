@@ -111,7 +111,6 @@ public class RefAuto1B_Right extends LinearOpMode {
         arms = Arrays.asList(armL, armR);//array of arm motors
 
         motorfr.setDirection(DcMotor.Direction.REVERSE); //reverse motor direction
-        motorbl.setDirection(DcMotor.Direction.REVERSE);
         armL.setDirection(DcMotor.Direction.REVERSE);
         grab.setDirection(DcMotor.Direction.REVERSE);
 

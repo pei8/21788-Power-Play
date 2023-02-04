@@ -25,7 +25,7 @@ public class RefOp01_Sensors extends LinearOpMode {
     private CRServo tilt;
 
     private KS109I2cDistance ks109;  // Hardware Device Object
-    private ColorSensor colorSens;
+    //private ColorSensor colorSens;
     private DistanceSensor distanceSens;
 
     /**
@@ -46,7 +46,7 @@ public class RefOp01_Sensors extends LinearOpMode {
         grab = hardwareMap.get(CRServo.class, "grab");
         tilt = hardwareMap.get(CRServo.class, "tilt");
         ks109 = hardwareMap.get(KS109I2cDistance.class, "ks109");
-        colorSens = hardwareMap.get(ColorSensor.class, "colorSens");
+        //colorSens = hardwareMap.get(ColorSensor.class, "colorSens");
         distanceSens = hardwareMap.get(DistanceSensor.class, "distanceSens");
 
         motorfr.setDirection(DcMotor.Direction.REVERSE);
@@ -61,26 +61,27 @@ public class RefOp01_Sensors extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-            R = colorSens.red();
-            G = colorSens.green();
-            B = colorSens.blue();
-            maxVal = Math.max(Math.max(R, G), B);
-            if (maxVal >= 200) {
-                if (R == maxVal)
-                    color = "Red";
-                else if (G == maxVal)
-                    color = "Green";
-                else
-                    color = "Blue";
-            }
-            else
-                color = "Unknown";
+//
+//            R = colorSens.red();
+//            G = colorSens.green();
+//            B = colorSens.blue();
+//            maxVal = Math.max(Math.max(R, G), B);
+//            if (maxVal >= 200) {
+//                if (R == maxVal)
+//                    color = "Red";
+//                else if (G == maxVal)
+//                    color = "Green";
+//                else
+//                    color = "Blue";
+//            }
+//            else
+//                color = "Unknown";
             distanceKs = ks109.getDistance();
             distanceRev = distanceSens.getDistance(DistanceUnit.INCH);
 
 
-            telemetry.addLine(String.format("\nRGB=%d, %d, %d. Color=%s\nDistance109=%.2f inch\nDistanceRev=%.2f inch",
-                    R, G, B, color, distanceKs, distanceRev));
+            telemetry.addLine(String.format("Distance109=%.2f inch\nDistanceRev=%.2f inch",
+                    distanceKs, distanceRev));
             telemetry.update();
             sleep(100);
         }

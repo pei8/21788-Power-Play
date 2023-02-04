@@ -111,7 +111,6 @@ public class RefAuto1B_Left extends LinearOpMode {
         arms = Arrays.asList(armL, armR);//array of arm motors
 
         motorfr.setDirection(DcMotor.Direction.REVERSE); //reverse motor direction
-        motorbl.setDirection(DcMotor.Direction.REVERSE);
         armL.setDirection(DcMotor.Direction.REVERSE);
         grab.setDirection(DcMotor.Direction.REVERSE);
 
@@ -194,7 +193,7 @@ public class RefAuto1B_Left extends LinearOpMode {
         //driveMotors(420,420,420,420,power);
 
         // turn right 45 degrees
-        int turnTicks = 70;
+        int turnTicks = 80;
         driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
 //        sleep(5000);
@@ -389,6 +388,7 @@ public class RefAuto1B_Left extends LinearOpMode {
         driveWithoutEncoders(0.3,0.3,-0.3,-0.3);
         while (opModeIsActive()){
             if (distanceSens.getDistance(DistanceUnit.INCH)<20){
+                //sleep(200);
                 driveWithoutEncoders(0,0,0,0);
                 break;
             }

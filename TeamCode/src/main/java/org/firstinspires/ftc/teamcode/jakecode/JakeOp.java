@@ -39,7 +39,6 @@ public class JakeOp extends LinearOpMode {
         tilt = hardwareMap.get(CRServo.class, "tilt");
 
         motorfr.setDirection(DcMotor.Direction.REVERSE);
-        motorbl.setDirection(DcMotor.Direction.REVERSE);
 
         armR.setDirection(DcMotor.Direction.REVERSE);
 
