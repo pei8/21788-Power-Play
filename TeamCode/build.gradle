@@ -25,6 +25,7 @@ android {
         jniLibs {
             pickFirsts += ['**/*.so']
         }
+
         jniLibs.useLegacyPackaging true
     }
 }
@@ -41,3 +42,4 @@ dependencies {
 dependencies {
 
 }
+
