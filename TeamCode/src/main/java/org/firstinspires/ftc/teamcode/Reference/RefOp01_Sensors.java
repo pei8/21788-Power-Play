@@ -3,12 +3,11 @@ package org.firstinspires.ftc.teamcode.Reference;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.driver.KS109I2cDistance;
+import org.firstinspires.ftc.teamcode.common.hardware.KS109I2cDistance;
 
 @TeleOp(name = "RefOp01_Sensors",group = "Linear Opmode")
 
