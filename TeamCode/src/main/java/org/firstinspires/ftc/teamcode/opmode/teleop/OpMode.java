@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "JakeOp",group = "Linear Opmode")
 
-public class JakeOp extends LinearOpMode {
+public class OpMode extends LinearOpMode {
 
     private DcMotor motorfl;
     private DcMotor motorbl;
