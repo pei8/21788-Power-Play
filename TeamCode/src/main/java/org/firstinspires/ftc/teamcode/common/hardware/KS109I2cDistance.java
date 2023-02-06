@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.driver;
+package org.firstinspires.ftc.teamcode.common;
 
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cAddrConfig;
@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.util.TypeConversion;
 
 import java.nio.ByteOrder;
 import java.util.Hashtable;
-import java.util.Locale;
 
 @I2cDeviceType
 @DeviceProperties(name = "KS 109", description = "a KS 109", xmlTag = "KS109I2cDistance")  // KS109I2cDistance is built-in

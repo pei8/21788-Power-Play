@@ -27,62 +27,64 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode.Reference;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.Func;
-import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.teamcode.common.hardware.KS109I2cDistance;
 
-import java.util.Locale;
+import java.util.Hashtable;
+import java.util.Map;
 
-/**
- * {@link SensorBNO055IMU} gives a short demo on how to use the BNO055 Inertial Motion Unit (IMU) from AdaFruit.
- *
- * Note: this is a Legacy example that will not work with newer Control/Expansion Hubs that use a different IMU
- * Please use the new SensorIMUOrthogonal or SensorIMUNonOrthogonal samples for a more universal IMU interface.
+/*
+ * This is an example LinearOpMode that shows how to use
+ * a Modern Robotics Optical Distance Sensor
+ * It assumes that the ODS sensor is configured with a name of "sensor_ods".
  *
  * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- *
- * @see <a href="http://www.adafruit.com/products/2472">Adafruit IMU</a>
  */
-@TeleOp(name = "MaxGyro", group = "Sensor")
-@Disabled   // Comment this out to add to the opmode list
-public class SensorBNO055IMU_Max extends LinearOpMode {
-    BNO055IMU imu;
+@TeleOp(name = "Sensor: KS 109", group = "Sensor")
+public class TeleopKS109 extends LinearOpMode {
 
-    Orientation angles;
+  KS109I2cDistance ks109;  // Hardware Device Object
 
-    @Override
+  @Override
+  public void runOpMode() {
 
-    public void runOpMode() throws InterruptedException{
-        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
-        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+    // get a reference to our Light Sensor object.
+  //  odsSensor = hardwareMap.get(OpticalDistanceSensor.class, "sensor_ods");
 
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
-        imu.initialize(parameters);
-
-        waitForStart();
-
-        while (opModeIsActive()){
-            angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-            telemetry.addData("Heading", angles.firstAngle);
-            telemetry.update();
-        }
+    ks109 = hardwareMap.get(KS109I2cDistance.class, "ks109");
 
 
+    Hashtable<String, Object> deviceInfo=ks109.getDeviceInfo();
+    for ( Map.Entry<String, Object> entry : deviceInfo.entrySet() ) {
+      telemetry.addData(entry.getKey(), entry.getValue());
     }
 
-}
+  //  ks109.slowConfig();
 
+    Hashtable<String, Object> settingInfo=ks109.getSettingInfo();
+    for ( Map.Entry<String, Object> entry : settingInfo.entrySet() ) {
+      telemetry.addData(entry.getKey(), entry.getValue());
+    }
+
+
+    telemetry.update();
+
+    // wait for the start button to be pressed.
+    waitForStart();
+
+    // while the op mode is active, loop and read the light levels.
+    // Note we use opModeIsActive() as our loop condition because it is an interruptible method.
+    while (opModeIsActive()) {
+
+      // send the info back to driver station using telemetry function.
+      double dDistance = ks109.getDistance();
+      telemetry.addData("Distance (in)", dDistance);
+      telemetry.update();
+    }
+  }
+}

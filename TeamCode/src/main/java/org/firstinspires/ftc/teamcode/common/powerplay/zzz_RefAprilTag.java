@@ -21,7 +21,6 @@
 
 package org.firstinspires.ftc.teamcode.Reference;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -30,8 +29,7 @@ import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
-import org.firstinspires.ftc.teamcode.common.AprilTagDetectionPipeline;
+import org.firstinspires.ftc.teamcode.common.powerplay.AprilTagDetectionPipeline;
 
 import java.util.ArrayList;
 

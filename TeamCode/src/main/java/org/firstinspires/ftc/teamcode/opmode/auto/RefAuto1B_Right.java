@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.Reference;
+package org.firstinspires.ftc.teamcode.opmode.auto;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -14,8 +14,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.teamcode.common.AprilTagDetectionPipeline;
-import org.firstinspires.ftc.teamcode.driver.KS109I2cDistance;
+import org.firstinspires.ftc.teamcode.common.powerplay.AprilTagDetectionPipeline;
+import org.firstinspires.ftc.teamcode.common.hardware.KS109I2cDistance;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name="RefAuto1B_Left", group="auto")
-public class RefAuto1B_Left extends LinearOpMode {
+@Autonomous(name="RefAuto1B_Right", group="auto")
+public class RefAuto1B_Right extends LinearOpMode {
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -118,7 +118,7 @@ public class RefAuto1B_Left extends LinearOpMode {
             motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
-        for (DcMotor arm: arms){
+        for (DcMotor arm: arms) {
             arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         }
@@ -192,8 +192,8 @@ public class RefAuto1B_Left extends LinearOpMode {
         driveMotorsToDistance(50, power);
         //driveMotors(420,420,420,420,power);
 
-        // turn right 45 degrees
-        int turnTicks = 80;
+        // turn right close to 45 degrees
+        int turnTicks = -70;
         driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
 //        sleep(5000);
@@ -208,7 +208,7 @@ public class RefAuto1B_Left extends LinearOpMode {
         //  2) Utilize ks109 distance sensor for more precise parking to the destination zone.
         //
         // Turn right for another 45 degree. Now the robot will have its back facing the wall.
-        turnTicks = 120;
+        turnTicks = -105;
         driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
 
@@ -218,19 +218,20 @@ public class RefAuto1B_Left extends LinearOpMode {
         double targetDistanceInch;
 
         if (tagID == LEFT){
-            driveMotors(-140,-140,-140,-140,0.2);
+            driveMotors(150,150,150,150,0.2);
             //targetDistanceInch = 5.0;
         }
         else if (tagID == MIDDLE){
             //targetDistanceInch = 28.0;
+            driveMotors(20,20,20,20,0.2);
         }
         else{// tagID == RIGHT
-            driveMotors(140,140,140,140,0.2);
+            driveMotors(-150,-150,-150,-150,0.2);
             //targetDistanceInch = 50.0;
         }
         //targetDistanceInch = 50.0;
         //driveMotorsToDistance(targetDistanceInch, 0.2);
-         // tilt the grabber inward a little bit
+        // tilt the grabber inward a little bit
         sleep(1000);
         requestOpModeStop();
     }
@@ -383,28 +384,27 @@ public class RefAuto1B_Left extends LinearOpMode {
         driveArm(target, armPower);
         sleep(intervalMs);
 
-        // Turn right until the Rev2M distance sensor detected a distance less than 20 inches
+        // Turn left until the Rev2M distance sensor detected a distance less than 20 inches
         // Otherwise, the distance sensor will give a very big number like 322 inches.
-        driveWithoutEncoders(0.3,0.3,-0.3,-0.3);
+       driveWithoutEncoders(-0.4,-0.4,0.4,0.4);
         while (opModeIsActive()){
             if (distanceSens.getDistance(DistanceUnit.INCH)<20){
-                //sleep(200);
                 driveWithoutEncoders(0,0,0,0);
                 break;
             }
         }
 
-        // move forward for x ticks
+        // move forward for x inches
         int forwardPos = 50;
         driveMotors(forwardPos, forwardPos, forwardPos, forwardPos, wheelPower);
         sleep(intervalMs);
 
-       // loose the grabber
+        // loose the grabber
         grab.setPower(0.5);
         sleep(intervalMs);
 
         // driver back
-        driveMotors(-forwardPos+20, -forwardPos+20, -forwardPos+20, -forwardPos+20, wheelPower);
+        driveMotors(-forwardPos+10, -forwardPos+10, -forwardPos+10, -forwardPos+10, wheelPower);
         sleep(intervalMs);
 
         // close the grabber
