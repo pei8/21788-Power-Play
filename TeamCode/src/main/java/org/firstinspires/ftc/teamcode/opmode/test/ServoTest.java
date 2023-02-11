@@ -29,17 +29,7 @@ public class ServoTest extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-            if(gamepad1.a){
-                robot.setGrabServoPosition(1);
-            }
-
-            if(gamepad1.b){
-                robot.setGrabServoPosition(0.5);
-            }
-
-            if(gamepad1.x){
-                robot.setGrabServoPosition(0);
-            }
+            robot.setTiltServoPosition((gamepad2.left_stick_y+1)/2);
 
             telemetry.update();
         }

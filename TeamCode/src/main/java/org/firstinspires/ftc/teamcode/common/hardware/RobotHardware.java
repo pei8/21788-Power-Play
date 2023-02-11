@@ -29,6 +29,8 @@
 
 package org.firstinspires.ftc.teamcode.common.hardware;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -51,6 +53,8 @@ public class RobotHardware {
 
     private Servo tiltServo = null;
     private Servo grabServo = null;
+
+    BNO055IMU imu;
 
     // Define a constructor that allows the OpMode to pass a reference to itself.
     public RobotHardware() {}
@@ -78,10 +82,10 @@ public class RobotHardware {
         armLeftMotor.setDirection(DcMotor.Direction.REVERSE);
 
         // If there are encoders connected, switch to RUN_USING_ENCODER mode for greater accuracy
-        frontLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
         tiltServo = hwMap.get(Servo.class, "tiltServo");
@@ -89,9 +93,23 @@ public class RobotHardware {
         tiltServo.setPosition(0.5);
         grabServo.setPosition(0.5);
 
+        // imu parameters
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.calibrationDataFile = "BNO0155IMUCalibration.json";
+        parameters.loggingEnabled = true;
+        parameters.loggingTag = "IMU";
+        parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
+
+        imu = hwMap.get(BNO055IMU.class,"imu");
+        imu.initialize(parameters);
     }
     public void setGrabServoPosition(double position) {
         grabServo.setPosition(position);
+    }
+    public void setTiltServoPosition(double position) {
+        tiltServo.setPosition(position);
     }
     public void setDrivePower(double fl, double fr, double bl, double br) {
         frontLeftDrive.setPower(fl);
@@ -99,6 +117,7 @@ public class RobotHardware {
         backLeftDrive.setPower(bl);
         backRightDrive.setPower(br);
     }
+    public void setAllDrivePower(double p){ setDrivePower(p,p,p,p);}
     public void setArmPower(double armPower){
         armRightMotor.setPower(armPower);
         armLeftMotor.setPower(armPower);
