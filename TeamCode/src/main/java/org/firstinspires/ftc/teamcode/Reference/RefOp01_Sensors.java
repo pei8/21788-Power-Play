@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode.Reference;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
@@ -20,8 +20,8 @@ public class RefOp01_Sensors extends LinearOpMode {
     private DcMotor armR;
     private DcMotor armL;
 
-    private CRServo grab;
-    private CRServo tilt;
+    private Servo grab;
+    private Servo tilt;
 
     private KS109I2cDistance ks109;  // Hardware Device Object
     //private ColorSensor colorSens;
@@ -42,8 +42,8 @@ public class RefOp01_Sensors extends LinearOpMode {
         armR = hardwareMap.get(DcMotor.class, "armR");
         armL = hardwareMap.get(DcMotor.class, "armL");
 
-        grab = hardwareMap.get(CRServo.class, "grab");
-        tilt = hardwareMap.get(CRServo.class, "tilt");
+        grab = hardwareMap.get(Servo.class, "grabServo");
+        tilt = hardwareMap.get(Servo.class, "tiltServo");
         ks109 = hardwareMap.get(KS109I2cDistance.class, "ks109");
         //colorSens = hardwareMap.get(ColorSensor.class, "colorSens");
         distanceSens = hardwareMap.get(DistanceSensor.class, "distanceSens");

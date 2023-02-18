@@ -1,7 +1,8 @@
-package org.firstinspires.ftc.teamcode.opmode.auto;
+package org.firstinspires.ftc.teamcode.Reference;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Autonomous(name="RefAuto1B_Left", group="auto")
+@Disabled
 public class RefAuto1B_Left extends LinearOpMode {
 
     OpenCvCamera camera;
@@ -102,8 +104,8 @@ public class RefAuto1B_Left extends LinearOpMode {
         armR = hardwareMap.get(DcMotor.class, "armR");
         armL = hardwareMap.get(DcMotor.class, "armL");
 
-        grab = hardwareMap.get(CRServo.class, "grab");
-        tilt = hardwareMap.get(CRServo.class, "tilt");
+        grab = hardwareMap.get(CRServo.class, "grabServo");
+        tilt = hardwareMap.get(CRServo.class, "tiltServo");
         ks109 = hardwareMap.get(KS109I2cDistance.class, "ks109");
         distanceSens = hardwareMap.get(DistanceSensor.class, "distanceSens");
 
@@ -208,7 +210,7 @@ public class RefAuto1B_Left extends LinearOpMode {
         //  2) Utilize ks109 distance sensor for more precise parking to the destination zone.
         //
         // Turn right for another 45 degree. Now the robot will have its back facing the wall.
-        turnTicks = 120;
+        turnTicks = 115;
         driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, 0.6);
         sleep(500);
 
@@ -247,35 +249,36 @@ public class RefAuto1B_Left extends LinearOpMode {
 
     }
     private void driveMotors(int flTarget, int blTarget, int frTarget, int brTarget, double speed){
-        flPos = flTarget;
-        blPos = blTarget;
-        frPos = frTarget;
-        brPos = brTarget;
 
+        motorfl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorbl.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorfr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorbr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        for (DcMotor motor: motors){
-            motor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        }
-        motorfl.setTargetPosition(flPos);
-        motorbl.setTargetPosition(blPos);
-        motorfr.setTargetPosition(frPos);
-        motorbr.setTargetPosition(brPos);
+        motorfl.setTargetPosition(flTarget);
+        motorbl.setTargetPosition(blTarget);
+        motorfr.setTargetPosition(frTarget);
+        motorbr.setTargetPosition(brTarget);
 
-        // set the desired power for all motors
-        for (DcMotor motor: motors){
-            motor.setPower(speed);
-        }
-        for (DcMotor motor: motors){
-            motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        }
+        motorfl.setPower(speed);
+        motorbl.setPower(speed);
+        motorfr.setPower(speed);
+        motorbr.setPower(speed);
+
+        motorfl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorbl.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorfr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motorbr.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         while(opModeIsActive() &&
                 (motorfl.isBusy() && motorbl.isBusy() && motorfr.isBusy() && motorbr.isBusy())){
             idle();
         }
-        for (DcMotor motor: motors){
-            motor.setPower(0);
-        }
+
+        motorfl.setPower(0);
+        motorbl.setPower(0);
+        motorfr.setPower(0);
+        motorbr.setPower(0);
     }
 
     private void driveMotorsToDistance(double targetDistanceInch, double power){
@@ -395,7 +398,7 @@ public class RefAuto1B_Left extends LinearOpMode {
         }
 
         // move forward for x ticks
-        int forwardPos = 50;
+        int forwardPos = 40;
         driveMotors(forwardPos, forwardPos, forwardPos, forwardPos, wheelPower);
         sleep(intervalMs);
 
