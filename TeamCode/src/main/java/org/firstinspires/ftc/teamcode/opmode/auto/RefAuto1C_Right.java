@@ -3,17 +3,15 @@ package org.firstinspires.ftc.teamcode.opmode.auto;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -28,8 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name="RefAuto1C_Left", group="auto")
-public class RefAuto1C_Left extends LinearOpMode {
+@Autonomous(name="RefAuto1C_Right", group="auto")
+public class RefAuto1C_Right extends LinearOpMode {
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -204,20 +202,19 @@ public class RefAuto1C_Left extends LinearOpMode {
         driveMotors(420,420,420,420, power, true, yaw0);
         sleep(500);
 
-        // move backward to 52 (+- 0.5) inches
-        driveMotorsToDistance(50, power, true, yaw0);
+        // move backward to XX inches
+        driveMotorsToDistance(51, power, true, yaw0);
         //driveMotors(420,420,420,420,power);
 
-        // turn right 45 degrees
-        int turnTicks = 80;
+        // turn left 45 degrees
+        int turnTicks = 70;
         double turnPower = 0.3;
-        driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, turnPower, false, 0);
+        driveMotors(-turnTicks, -turnTicks, turnTicks, turnTicks, turnPower, false, 0);
         sleep(500);
-//        sleep(5000);
 
         // place cone and low arm to XX from final high position YY
         // The end position must be calculated based on previous position.
-        placeCone(70,-60, 1000, 0.6, 0.5);
+        placeCone(70,-60, 1000, 0.3, 0.5);
 
         // This is the major difference between 1A and 1B.
         // Robot will turn right for about 45 degrees with its back facing the wall in order to:
@@ -225,7 +222,7 @@ public class RefAuto1C_Left extends LinearOpMode {
         //  2) Utilize ks109 distance sensor for more precise parking to the destination zone.
         //
         // Turn right for exactly 90 degree using IMU sensor.
-        turnToTargetYaw(-90 + yaw0, turnPower, 2000);
+        turnToTargetYaw(90 + yaw0, turnPower, 3000);
         sleep(500);
 
         //
@@ -236,7 +233,7 @@ public class RefAuto1C_Left extends LinearOpMode {
         if (tagID == LEFT){
 //            moveTicks = -140;
 //            driveMotors(moveTicks,moveTicks,moveTicks,moveTicks,0.2);
-            targetDistanceInch = 5.0;
+            targetDistanceInch = 48.0;
         }
         else if (tagID == MIDDLE){
             targetDistanceInch = 27.0;
@@ -244,9 +241,9 @@ public class RefAuto1C_Left extends LinearOpMode {
         else{// tagID == RIGHT
 //            moveTicks = 150;
 //            driveMotors(moveTicks,moveTicks,moveTicks,moveTicks,0.2);
-            targetDistanceInch = 48.0;
+            targetDistanceInch = 5.0;
         }
-        driveMotorsToDistance(targetDistanceInch, 0.2, true, -90 + yaw0);
+        driveMotorsToDistance(targetDistanceInch, 0.2, true, 90 + yaw0);
         sleep(1000);
         requestOpModeStop();
     }
@@ -389,12 +386,12 @@ public class RefAuto1C_Left extends LinearOpMode {
         tilt.setPosition(0.7);
         sleep(intervalMs);
 
-        // Turn right slowly
+        // Turn left slowly
         // Record yawBegin when the Rev2M distance sensor detected a distance less than 20 inches
         // Record yawEnd when the distance is bigger than 20 inches.
         // So that yawMid can be used to precisely orient the robot.
         yawBegin = yawEnd = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-        driveWithoutEncoders(0.3,0.3,-0.3,-0.3);
+        driveWithoutEncoders(-0.3,-0.3,0.3,0.3);
         while (opModeIsActive()){
             if (distanceSens.getDistance(DistanceUnit.INCH)<20){
                 // Record yawBegin. Do not stop the robot turning.
@@ -419,14 +416,11 @@ public class RefAuto1C_Left extends LinearOpMode {
                 yaw0, yawBegin, yawEnd, yawMid, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)));
         telemetry.update();
 
-//        sleep(30000);
-//        requestOpModeStop();
-
         // move forward till X inches
         // use two distance sensors to improve reliability
         double powerRatio = 1.0;
         driveWithoutEncoders(0.3,0.3,0.3,0.3);
-        double targetDistance = 14, currentDistance;
+        double targetDistance = 12, currentDistance;
         while (opModeIsActive()){
             currentDistance = Math.min(
                     distanceSens.getDistance(DistanceUnit.INCH),
@@ -451,7 +445,7 @@ public class RefAuto1C_Left extends LinearOpMode {
         sleep(intervalMs);
 
         // driver back
-        int backwardTicks = -40;
+        int backwardTicks = -46;
         driveMotors(backwardTicks, backwardTicks, backwardTicks, backwardTicks, wheelPower, false, 0);
         sleep(intervalMs);
 
