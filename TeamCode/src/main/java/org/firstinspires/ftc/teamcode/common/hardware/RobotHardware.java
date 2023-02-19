@@ -28,13 +28,18 @@
  */
 
 package org.firstinspires.ftc.teamcode.common.hardware;
-
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 
 public class RobotHardware {
@@ -43,16 +48,16 @@ public class RobotHardware {
     HardwareMap hwMap =  null;
 
     // Define Motor and Servo objects  (Make them private so they can't be accessed externally)
-    private DcMotor frontLeftDrive   = null;
-    private DcMotor frontRightDrive   = null;
-    private DcMotor backRightDrive   = null;
-    private DcMotor backLeftDrive   = null;
+    public DcMotor frontLeftDrive   = null;
+    public DcMotor frontRightDrive   = null;
+    public DcMotor backRightDrive   = null;
+    public DcMotor backLeftDrive   = null;
 
-    private DcMotor armRightMotor = null;
-    private DcMotor armLeftMotor = null;
+    public DcMotor armRightMotor = null;
+    public DcMotor armLeftMotor = null;
 
-    private Servo tiltServo = null;
-    private Servo grabServo = null;
+    public Servo tiltServo = null;
+    public Servo grabServo = null;
 
     BNO055IMU imu;
 
@@ -77,15 +82,20 @@ public class RobotHardware {
         armRightMotor   = hwMap.get(DcMotor.class, "armR");
         armLeftMotor   = hwMap.get(DcMotor.class, "armL");
 
+        // set Brake zero power behavior
+        frontRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         // reverse motor directions
         frontRightDrive.setDirection(DcMotor.Direction.REVERSE); //reverse motor direction
         armLeftMotor.setDirection(DcMotor.Direction.REVERSE);
 
+
+
         // If there are encoders connected, switch to RUN_USING_ENCODER mode for greater accuracy
-        frontLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        frontRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backLeftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        setDrivetrainMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Define and initialize ALL installed servos.
         tiltServo = hwMap.get(Servo.class, "tiltServo");
@@ -104,13 +114,21 @@ public class RobotHardware {
 
         imu = hwMap.get(BNO055IMU.class,"imu");
         imu.initialize(parameters);
+
+
     }
-    public void setGrabServoPosition(double position) {
-        grabServo.setPosition(position);
+    public void setDrivetrainMode(DcMotor.RunMode mode) {
+        frontLeftDrive.setMode(mode);
+        frontRightDrive.setMode(mode);
+        backLeftDrive.setMode(mode);
+        backRightDrive.setMode(mode);
     }
-    public void setTiltServoPosition(double position) {
-        tiltServo.setPosition(position);
+    public void setArmsMode(DcMotor.RunMode mode) {
+        armLeftMotor.setMode(mode);
+        armRightMotor.setMode(mode);
     }
+
+
     public void setDrivePower(double fl, double fr, double bl, double br) {
         frontLeftDrive.setPower(fl);
         frontRightDrive.setPower(fr);
@@ -122,6 +140,10 @@ public class RobotHardware {
         armRightMotor.setPower(armPower);
         armLeftMotor.setPower(armPower);
     }
+
+
+
+
 
 
 }

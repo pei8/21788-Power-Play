@@ -35,16 +35,17 @@ public class Gyro extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        turn(90);
-
-        sleep(3000);
-
-        turnTo(-90);
-
 //        while (opModeIsActive()){
-//            getAngle();
+//            Orientation orientation = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//
+//            telemetry.addData("Orientation: ",orientation.firstAngle);
 //            telemetry.update();
 //        }
+
+        turnTo(90);
+        sleep(3000);
+
+
     }
     public void resetAngle(){
         lastAngles = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -74,7 +75,7 @@ public class Gyro extends LinearOpMode {
 
         double error = degrees;
 
-        while (opModeIsActive() && Math.abs(error) > 2){
+        while (opModeIsActive() && Math.abs(error)>2){
             //double motorPower = (error < 0 ? -0.3 : 0.3);
             double motorPower = Math.min(error*0.01,0.3);
             robot.setDrivePower(-motorPower, motorPower, -motorPower, motorPower);
@@ -96,7 +97,18 @@ public class Gyro extends LinearOpMode {
         else if (error < -180) {
             error += 360;
         }
+        while (opModeIsActive() && Math.abs(error)>10){
+            Orientation currOrientation = robot.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
-        turn(error);
+            double motorPower = (error < 0 ? -0.35 : 0.35);
+            robot.setDrivePower(-motorPower, motorPower, -motorPower, motorPower);
+            error = degrees - currOrientation.firstAngle;
+            telemetry.addData("Orientation: ",currOrientation.firstAngle);
+            telemetry.addData("Error: ",Math.abs(error));
+
+            telemetry.update();
+
+        }
+
     }
 }
