@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.common.hardware.RobotHardware;
 
-@Autonomous(name="Gyro")
+@Autonomous(name="Gyro", group = "test")
 public class Gyro extends LinearOpMode {
     RobotHardware robot = new RobotHardware();
     // Declare OpMode members.

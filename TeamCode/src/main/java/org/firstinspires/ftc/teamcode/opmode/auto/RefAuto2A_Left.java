@@ -3,17 +3,15 @@ package org.firstinspires.ftc.teamcode.opmode.auto;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -28,8 +26,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Autonomous(name="RefAuto1C_Left", group="auto")
-public class RefAuto1C_Left extends LinearOpMode {
+@Autonomous(name="RefAuto2A_Left", group="auto")
+public class RefAuto2A_Left extends LinearOpMode {
 
     OpenCvCamera camera;
     AprilTagDetectionPipeline aprilTagDetectionPipeline;
@@ -96,7 +94,6 @@ public class RefAuto1C_Left extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        long maxAllowedTimeInMills = 2000;
         // Initialize IMU in the control hub
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
         RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
@@ -199,60 +196,44 @@ public class RefAuto1C_Left extends LinearOpMode {
         // push signal cone away - move forward first and then move backward to be away from the signal cone.
         // Field test data:
         //  1) 400 ticks == 61 inch  ====> 1 inch == 6.56 ticks
-        //  2) Power 0.6 is the most stable power level
-        double power = 0.3;
-        double factor = 1;
-        driveMotors(420,420,420,420, power, true, yaw0);
-        sleep(500);
+        //  2) Increase power level to reduce time.
+        //  Power 0.6 is the most stable power level
+        double wheelPower = 0.5, turnPower = 0.6, armPower = 0.5;
+        driveMotors(420,420,420,420, wheelPower, true, yaw0);
 
-        // move backward to 52 (+- 0.5) inches
-        maxAllowedTimeInMills = 3000;
-        driveMotorsToDistance(51, power, true, yaw0, maxAllowedTimeInMills);
-        //driveMotors(420,420,420,420,power);
+        // move backward to XX (+- 0.5) inches
+        driveMotorsToDistance(50, wheelPower, true, yaw0);
 
         // turn right 45 degrees
-        int turnTicks = 80;
-        double turnPower = 0.3;
-        driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, turnPower, false, 0);
-        sleep(500);
-//        sleep(5000);
+        turnToTargetYaw(-45 + yaw0, turnPower, 2000);
 
         // place cone and low arm to XX from final high position YY
         // The end position must be calculated based on previous position.
-        placeCone(70,-60, 1000, 0.6, 0.5);
+        int opIntervalInMs = 500;
+        placeCone(70,-60, opIntervalInMs, wheelPower, armPower);
 
-        // This is the major difference between 1A and 1B.
-        // Robot will turn right for about 45 degrees with its back facing the wall in order to:
-        //  1) Reduce the turn error due to the bigger rotation.
-        //  2) Utilize ks109 distance sensor for more precise parking to the destination zone.
-        //
-        // Turn right for exactly 90 degree using IMU sensor.
-        turnToTargetYaw(-90 + yaw0, turnPower, maxAllowedTimeInMills);
-        sleep(500);
+        // Turn left for exactly 90 degree using IMU sensor and face the wall.
+        turnToTargetYaw(90 + yaw0, turnPower, 6000);
 
         //
-        // Park to the identified zone accurately by using ks109 sensor...
+        // Park to the identified zone by ticks.
         //
         double targetDistanceInch;
         int moveTicks = 0;
         if (tagID == LEFT){
-//            moveTicks = -140;
-//            driveMotors(moveTicks,moveTicks,moveTicks,moveTicks,0.2);
+            moveTicks = 140;
+            driveMotors(moveTicks, moveTicks, moveTicks, moveTicks, wheelPower, true, 90 + yaw0);
             targetDistanceInch = 5.0;
-            maxAllowedTimeInMills = 2000;
         }
         else if (tagID == MIDDLE){
             targetDistanceInch = 27.0;
-            maxAllowedTimeInMills = 5000;
         }
         else{// tagID == RIGHT
-//            moveTicks = 150;
-//            driveMotors(moveTicks,moveTicks,moveTicks,moveTicks,0.2);
+            moveTicks = -150;
+            driveMotors(moveTicks, moveTicks, moveTicks, moveTicks,wheelPower, true, 90 + yaw0);
             targetDistanceInch = 48.0;
-            maxAllowedTimeInMills = 5000;
         }
-        driveMotorsToDistance(targetDistanceInch, 0.2, true, -90 + yaw0, maxAllowedTimeInMills);
-        sleep(1000);
+//        driveMotorsToDistance(targetDistanceInch, 0.2, true, -90 + yaw0);
         requestOpModeStop();
     }
 
@@ -333,17 +314,13 @@ public class RefAuto1C_Left extends LinearOpMode {
         motorbr.setPower(0);
     }
 
-    private void driveMotorsToDistance(double targetDistanceInch, double power, boolean bKeepYaw, double targetYaw, long maxAllowedTimeInMills){
-        long timeBegin, timeCurrent;
+    private void driveMotorsToDistance(double targetDistanceInch, double power, boolean bKeepYaw, double targetYaw){
         double currentDistance = ks109.getDistance();
         int ticks, tickDirection;
         double diff = Math.abs(currentDistance - targetDistanceInch);
         telemetry.addLine(String.format("\nDistance=%.2f inch", currentDistance));
         telemetry.update();
-        timeBegin = timeCurrent = System.currentTimeMillis();
-        while (diff > 0.7
-                && opModeIsActive()
-                && ((timeCurrent - timeBegin) < maxAllowedTimeInMills)){
+        while (diff > 1.0 && opModeIsActive()) {
             ticks = (int) (diff * ticksPerInch);
             tickDirection = (currentDistance < targetDistanceInch) ? 1 : -1;
             if (ticks > 0) {
@@ -355,7 +332,6 @@ public class RefAuto1C_Left extends LinearOpMode {
             telemetry.addLine(String.format("\nDistance=%.2f inch", currentDistance));
             telemetry.update();
             diff = Math.abs(currentDistance - targetDistanceInch);
-            timeCurrent = System.currentTimeMillis();
         }
     }
 
@@ -388,11 +364,9 @@ public class RefAuto1C_Left extends LinearOpMode {
     }
 
     public void placeCone(int target, int end, int intervalMs, double wheelPower, double armPower){
-        long timeBegin, timeCurrent, maxAllowedTimeInMills=2000;
         double yawBegin;    // yaw degrees detected a junction
         double yawEnd;      // yaw degrees lost a junction;
         double yawMid;      // yaw degrees face to the middle of the junction.
-        double yawJunction; // yaw degrees of a junction
 
         // Raise arm
         driveArm(target, armPower);
@@ -401,57 +375,45 @@ public class RefAuto1C_Left extends LinearOpMode {
         tilt.setPosition(0.7);
         sleep(intervalMs);
 
-//        // Turn right slowly
-//        // Record yawBegin when the Rev2M distance sensor detected a distance less than 20 inches
-//        // Record yawEnd when the distance is bigger than 20 inches.
-//        // So that yawMid can be used to precisely orient the robot.
-//        yawBegin = yawEnd = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-//        timeBegin = timeCurrent = System.currentTimeMillis();
-//        driveWithoutEncoders(0.3,0.3,-0.3,-0.3);
-//        while (opModeIsActive()
-//                && ((timeCurrent - timeBegin) < maxAllowedTimeInMills)){
-//            if (distanceSens.getDistance(DistanceUnit.INCH)<20){
-//                // Record yawBegin. Do not stop the robot turning.
-//                yawBegin = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-//                driveWithoutEncoders(0,0,0,0);
-//                sleep(200);
-//                 break;
-//            }
-//            timeCurrent = System.currentTimeMillis();
-//        }
-////
-////        while (opModeIsActive()){
-////            if (distanceSens.getDistance(DistanceUnit.INCH)>20){
-////                // Record yawBegin. STOP the robot turning.
-////                yawEnd = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
-////                driveWithoutEncoders(0,0,0,0);
-////                break;
-////            }
-////        }
-//        // Calculate yawMid
-//        //  r = radius = 16 inch (sensor-to-junction) + 2 inch (sensor-to-robot-center)
-//        //  p = perimeter = 2 * PI * r
-//        //  d = diameter of junction = 1 inch
-//        yawEnd = yawBegin + (1 / (2 * 3.1415926 * 18)) * 360;
-//        yawMid = yawBegin + (yawEnd - yawBegin) * 0.75;
-        yawBegin = yawMid = yawEnd = -46 + yaw0;
+        // Turn right slowly
+        // Record yawBegin when the Rev2M distance sensor detected a distance less than 20 inches
+        // Record yawEnd when the distance is bigger than 20 inches.
+        // So that yawMid can be used to precisely orient the robot.
+        yawBegin = yawEnd = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        driveWithoutEncoders(0.3,0.3,-0.3,-0.3);
+        while (opModeIsActive()){
+            if (distanceSens.getDistance(DistanceUnit.INCH)<20){
+                // Record yawBegin. Do not stop the robot turning.
+                yawBegin = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                 break;
+            }
+        }
+        while (opModeIsActive()){
+            if (distanceSens.getDistance(DistanceUnit.INCH)>20){
+                // Record yawBegin. STOP the robot turning.
+                yawEnd = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+                driveWithoutEncoders(0,0,0,0);
+                break;
+            }
+        }
+        yawMid = yawBegin + (yawEnd - yawBegin) * 0.5;
+        telemetry.addLine(String.format("yaw0=%.2f\nyawBegin=%.2f\nyawEnd=%.2f\nyawMid=%.2f\nyawCurrent=%.2f",
+                yaw0, yawBegin, yawEnd, yawMid, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)));
+        telemetry.update();
+        turnToTargetYaw(yawMid, wheelPower, 2000);
+        telemetry.addLine(String.format("yaw0=%.2f\nyawBegin=%.2f\nyawEnd=%.2f\nyawMid=%.2f\nyawCurrent=%.2f",
+                yaw0, yawBegin, yawEnd, yawMid, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)));
+        telemetry.update();
 
-        telemetry.addLine(String.format("yaw0=%.2f\nyawBegin=%.2f\nyawEnd=%.2f\nyawMid=%.2f\nyawCurrent=%.2f",
-                yaw0, yawBegin, yawEnd, yawMid, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)));
-        telemetry.update();
-        turnToTargetYaw(yawMid, wheelPower, maxAllowedTimeInMills);
-        telemetry.addLine(String.format("yaw0=%.2f\nyawBegin=%.2f\nyawEnd=%.2f\nyawMid=%.2f\nyawCurrent=%.2f",
-                yaw0, yawBegin, yawEnd, yawMid, imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES)));
-        telemetry.update();
+//        sleep(30000);
+//        requestOpModeStop();
 
         // move forward till X inches
         // use two distance sensors to improve reliability
         double powerRatio = 1.0;
         driveWithoutEncoders(0.3,0.3,0.3,0.3);
-        double targetDistance = 13.5, currentDistance;
-        timeBegin = timeCurrent = System.currentTimeMillis();
-        while (opModeIsActive()
-                && ((timeCurrent - timeBegin) < maxAllowedTimeInMills)){
+        double targetDistance = 14, currentDistance;
+        while (opModeIsActive()){
             currentDistance = Math.min(
                     distanceSens.getDistance(DistanceUnit.INCH),
                     distanceSens2.getDistance(DistanceUnit.INCH));
@@ -465,7 +427,6 @@ public class RefAuto1C_Left extends LinearOpMode {
             else
                 powerRatio = Math.abs(currentDistance - targetDistance) / 2.0;
             driveWithoutEncoders(0.3 * powerRatio,0.3 * powerRatio,0.3 * powerRatio,0.3 * powerRatio);
-            timeCurrent = System.currentTimeMillis();
         }
 
         tilt.setPosition(1.0);
@@ -504,15 +465,15 @@ public class RefAuto1C_Left extends LinearOpMode {
                 && opModeIsActive()
                 && ((timeCurrent-timeBegin) < maxAllowedTimeInMills)) {
             ticks = (int) (diffYaw * ticksPerDegree);
-            if (ticks > 50)
-                ticks = 50;
+            if (ticks > 100)
+                ticks = 100;
             tickDirection = (currentYaw < targetYawDegree) ? -1 : 1;
             if (ticks < 1)
                 break;
-            if (diffYaw > 3)
+            if (diffYaw > 4)
                 factor = 1.0;
             else
-                factor = diffYaw / 3;
+                factor = diffYaw / 4;
             driveMotors(
                     (int)(tickDirection * ticks),
                     (int)(tickDirection * ticks),

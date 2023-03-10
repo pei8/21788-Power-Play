@@ -41,7 +41,7 @@ import org.firstinspires.ftc.teamcode.common.hardware.RobotHardware;
  * Encoder-based move in square with both turn and sidestep movement
  */
 
-@Autonomous(name="PushBotAuto")
+@Autonomous(name="PushBotAuto", group = "test")
 
 public class PushBotAuto extends LinearOpMode {
 
