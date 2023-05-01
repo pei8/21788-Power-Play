@@ -202,56 +202,6 @@ public class Chris_1D_Left extends LinearOpMode {
         double factor = 1;
         driveMotors(420,420,420,420, power, true, yaw0);
         sleep(500);
-
-        // move backward to 52 (+- 0.5) inches
-        maxAllowedTimeInMills = 3000;
-        driveMotorsToDistance(51, power, true, yaw0, maxAllowedTimeInMills);
-        //driveMotors(420,420,420,420,power);
-
-        // turn right 45 degrees
-        int turnTicks = 80;
-        double turnPower = 0.3;
-        driveMotors(turnTicks, turnTicks, -turnTicks, -turnTicks, turnPower, false, 0);
-        sleep(500);
-//        sleep(5000);
-
-        // place cone and low arm to XX from final high position YY
-        // The end position must be calculated based on previous position.
-        placeCone(70,-60, 1000, 0.6, 0.5);
-
-        // This is the major difference between 1A and 1B.
-        // Robot will turn right for about 45 degrees with its back facing the wall in order to:
-        //  1) Reduce the turn error due to the bigger rotation.
-        //  2) Utilize ks109 distance sensor for more precise parking to the destination zone.
-        //
-        // Turn right for exactly 90 degree using IMU sensor.
-        turnToTargetYaw(-90 + yaw0, turnPower, maxAllowedTimeInMills);
-        sleep(500);
-
-        //
-        // Park to the identified zone accurately by using ks109 sensor...
-        //
-        double targetDistanceInch;
-        int moveTicks = 0;
-        if (tagID == LEFT){
-//            moveTicks = -140;
-//            driveMotors(moveTicks,moveTicks,moveTicks,moveTicks,0.2);
-            targetDistanceInch = 5.0;
-            maxAllowedTimeInMills = 2000;
-        }
-        else if (tagID == MIDDLE){
-            targetDistanceInch = 27.0;
-            maxAllowedTimeInMills = 5000;
-        }
-        else{// tagID == RIGHT
-//            moveTicks = 150;
-//            driveMotors(moveTicks,moveTicks,moveTicks,moveTicks,0.2);
-            targetDistanceInch = 48.0;
-            maxAllowedTimeInMills = 5000;
-        }
-        driveMotorsToDistance(targetDistanceInch, 0.2, true, -90 + yaw0, maxAllowedTimeInMills);
-        sleep(1000);
-        requestOpModeStop();
     }
 
 
